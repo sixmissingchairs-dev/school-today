@@ -242,6 +242,8 @@ const SYMPTOMS = [
         ["rx_slapped", "Slapped cheek"], ["rx_chicken", "Chickenpox"], ["rx_strep", "Scarlet fever"],
         ["rx_moll", "Molluscum"], ["rx_scabies", "Scabies"], ["rx_tinea", "Ringworm or tinea"],
       ]},
+      { id: "r_tx", kind: "date", q: "When did treatment start?",
+        showIf: (d) => ["rx_strep", "rx_scabies", "rx_tinea"].includes(d.r_dx) },
       { id: "r_crusted", kind: "toggle", q: "Every spot has dried and crusted over" },
       { id: "r_well", kind: "toggle", q: "Otherwise fully recovered" },
     ],
@@ -342,6 +344,8 @@ const SYMPTOMS = [
 ];
 
 /* Local date, not UTC: toISOString() is still "yesterday" before 10am in Queensland. */
+const shown = (q, d) => !q.showIf || q.showIf(d);
+
 const todayISO = () => new Date().toLocaleDateString("en-CA");
 
 function daysSince(iso) {
@@ -483,6 +487,8 @@ function evaluate(ageMonths, picked, flagged, d) {
   if (has("rash")) {
     const since = d.r_since;
     const days = daysSince(since);
+    /* Treatment date from the rash question, or the same date given under another ticked symptom. */
+    const rashTx = (other) => d.r_tx ?? d[other];
     if (is("r_dx", "rx_measles")) f.push({
       v: "red",
       name: "Measles",
@@ -522,7 +528,7 @@ function evaluate(ageMonths, picked, flagged, d) {
       rule: "No exclusion.", watch: null, back: "No exclusion applies.", src: QLD,
     });
     else if (is("r_dx", "rx_strep")) f.push({
-      v: daysSince(d.resp_abx) !== null && daysSince(d.resp_abx) >= 1 ? "green" : "red",
+      v: daysSince(rashTx("resp_abx")) !== null && daysSince(rashTx("resp_abx")) >= 1 ? "green" : "red",
       name: "Scarlet fever",
       rule: "Excluded until they've had antibiotics for at least 24 hours and feel well. Both conditions, not just the clock.",
       watch: "Trouble swallowing or breathing, or a fever that returns days later.",
@@ -530,16 +536,16 @@ function evaluate(ageMonths, picked, flagged, d) {
       src: QLD,
     });
     else if (is("r_dx", "rx_scabies")) f.push({
-      v: daysSince(d.i_tx) !== null && daysSince(d.i_tx) >= 1 ? "green" : "red",
+      v: daysSince(rashTx("i_tx")) !== null && daysSince(rashTx("i_tx")) >= 1 ? "green" : "red",
       name: "Scabies",
       rule: "Excluded until the day after treatment started. Starting it this morning doesn't clear them for today.",
-      watch: null, back: returnLine(d.i_tx, 1, "The day after treatment starts."), src: QLD,
+      watch: null, back: returnLine(rashTx("i_tx"), 1, "The day after treatment starts."), src: QLD,
     });
     else if (is("r_dx", "rx_tinea")) f.push({
-      v: daysSince(d.ring_tx) !== null && daysSince(d.ring_tx) >= 1 ? "green" : "red",
+      v: daysSince(rashTx("ring_tx")) !== null && daysSince(rashTx("ring_tx")) >= 1 ? "green" : "red",
       name: "Ringworm or tinea",
       rule: "Excluded until the day after antifungal treatment started. (Thrush carries no exclusion.)",
-      watch: null, back: returnLine(d.ring_tx, 1, "The day after antifungal treatment starts."), src: QLD,
+      watch: null, back: returnLine(rashTx("ring_tx"), 1, "The day after antifungal treatment starts."), src: QLD,
     });
     else f.push({
       v: "amber",
@@ -991,7 +997,7 @@ export default function SchoolToday() {
   const live = useMemo(() => {
     const out = {};
     SYMPTOMS.filter((s) => picked.includes(s.id)).forEach((s) =>
-      s.subs.forEach((q) => { if (detail[q.id] !== undefined) out[q.id] = detail[q.id]; })
+      s.subs.forEach((q) => { if (shown(q, detail) && detail[q.id] !== undefined) out[q.id] = detail[q.id]; })
     );
     return out;
   }, [picked, detail]);
@@ -1065,7 +1071,7 @@ export default function SchoolToday() {
                   <Row label={s.label} on={on} onToggle={() => toggleIn(setPicked)(s.id)} />
                   {on && s.subs.length > 0 && (
                     <div className="st-subs">
-                      {s.subs.map((q) => (
+                      {s.subs.filter((q) => shown(q, detail)).map((q) => (
                         <Sub key={q.id} spec={q} value={detail[q.id]} onChange={(nv) => setSub(q.id, nv)} />
                       ))}
                     </div>

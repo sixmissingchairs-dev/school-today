@@ -95,6 +95,11 @@ The card says so, and quotes the source's actual wording.
   Each finding has `v` (verdict), `name`, `rule`, `watch`, `back`, `src`.
 - Verdict is the worst of the findings. `VERDICT[x].rank` orders them.
 - Answers only count while their parent symptom is ticked — see the `live` memo.
+  A sub-question with `showIf` also only renders and counts while that holds.
+- A rule must read a date from its own symptom's sub-questions. Reading another
+  symptom's field silently fails when that symptom isn't ticked. The rash rules for
+  scarlet fever, scabies and tinea read `r_tx`, falling back to the matching date
+  from the throat, itch or scaly-patch questions if the parent answered it there.
 
 Per-symptom onset dates drive the exclusion clocks, so "back at school" renders as an
 actual date rather than a countdown the parent has to do. `returnLine()` handles that,
