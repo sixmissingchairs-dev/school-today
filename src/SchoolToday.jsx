@@ -47,7 +47,12 @@ const STYLES = `
   font-size: 34px; line-height: 1.08; font-weight: 400;
   letter-spacing: -0.01em; margin: 0 0 10px; text-wrap: balance;
 }
-.st-sub { font-size: 15px; line-height: 1.5; color: var(--ink-soft); margin: 0 0 26px; }
+.st-sub { font-size: 16px; line-height: 1.5; color: var(--ink); margin: 0 0 12px; }
+.st-caveat {
+  font-size: 13.5px; line-height: 1.5; color: var(--ink-soft);
+  border-left: 2px solid var(--line); padding-left: 11px; margin: 0 0 26px;
+}
+.st-caveat a { color: var(--ink); text-underline-offset: 2px; white-space: nowrap; }
 /* step number sits in front of each section heading */
 .st-step {
   display: inline-block; min-width: 20px;
@@ -1019,8 +1024,14 @@ export default function SchoolToday() {
       <div className="st-wrap">
         <h1 className="st-title">Can I send my child to school today?</h1>
         <p className="st-sub">
-          Three steps. Your answer shows in the bar at the bottom and updates as you
-          go. Tap it to see the rule behind it and where it comes from.
+          Is your child feeling unwell this morning? Answer a few quick questions and
+          we'll tell you whether they can go to school, and why.
+        </p>
+        <p className="st-caveat">
+          It's based on official health guidelines, but it isn't medical advice and it
+          can't examine your child. If you're worried, call your GP or 13&nbsp;HEALTH
+          on <a href="tel:134325584">13&nbsp;43&nbsp;25&nbsp;84</a>. In an emergency,
+          call <a href="tel:000">000</a>.
         </p>
 
         <p className="st-section-head"><span className="st-step">1</span>How old is your child?</p>
@@ -1085,9 +1096,7 @@ export default function SchoolToday() {
         <p className="st-foot">
           Prototype. Rules checked September 2026 against Queensland Health's Time Out
           poster (January 2026) and the NHMRC Staying Healthy 6th edition fact sheets;
-          where those two conflict, Time Out is used. This isn't medical advice and it
-          can't examine your child. If you're worried, ring your GP or 13&nbsp;HEALTH on
-          13&nbsp;43&nbsp;25&nbsp;84. If it's an emergency, call 000.
+          where those two conflict, Time Out is used.
         </p>
       </div>
 
