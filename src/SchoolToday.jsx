@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { track } from "@vercel/analytics";
 
 /**
  * School Today — prototype
@@ -999,6 +1000,13 @@ export default function SchoolToday() {
   const v = VERDICT[result.verdict];
   const canOpen = result.verdict !== "none";
 
+  /* Verdict colour only. No symptoms, conditions or age leave the device. */
+  const openResult = () => {
+    if (!canOpen) return;
+    track("Result viewed", { verdict: result.verdict });
+    setOpen(true);
+  };
+
   return (
     <div className="st-root">
       <style>{STYLES}</style>
@@ -1079,7 +1087,7 @@ export default function SchoolToday() {
 
       <button
         type="button" className="st-bar" style={{ background: v.bg }}
-        onClick={() => canOpen && setOpen(true)} aria-disabled={!canOpen}
+        onClick={openResult} aria-disabled={!canOpen}
       >
         <span className="st-bar-inner">
           <span>
